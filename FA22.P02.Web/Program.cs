@@ -21,9 +21,21 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
+var names = new[]
+{
+    "Jordan", "Lamarr", "Cory", "Dashie"
+};
+
+app.MapGet("/famoutnames", () =>
+{
+    var name = names[0];
+    return name;
+})
+    .WithName("GetFamousNames");
+
 app.MapGet("/weatherforecast", () =>
 {
-    throw new Exception("remove me");
+   
     var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
