@@ -112,7 +112,23 @@ app.MapPut("/products/{update-product}", (int id, string name, string descriptio
     {
         return Results.BadRequest("Product does not exist");
     }
-    var product = new Product() { Id = id, Name = name, Description = description, Price = price };
+
+    if (name.Length > 120 || name.Length == 0)
+    {
+        return Results.BadRequest("Invalid Product name");
+    }
+
+    if (description.Length > 120 || description.Length == 0)
+    {
+        return Results.BadRequest("Invalid Product description");
+    }
+
+    if (price <= 0)
+    {
+        return Results.BadRequest("Invalid Price");
+    }
+
+    
     foreach(var products in products1)
     {
         if(id == products.Id)
@@ -131,15 +147,20 @@ app.MapPut("/products/{update-product}", (int id, string name, string descriptio
 
 app.MapDelete("/products/{delete-product}", (int Id) =>
 {
-   
-   
-    var id = products1.FindIndex(products1 => products1.Id == Id);
-    products1.RemoveAt(id);
+    var result = products1.FirstOrDefault(x => x.Id == Id);
+
+    if (result == null)
+    {
+        return Results.BadRequest("Product does not exist");
+    }
+
+    var id = products1.FirstOrDefault(x => x.Id == Id);
+    products1.Remove(id);
 
    
 
     var iD = products1;
-    return iD;
+    return Results.Ok(iD);
 
 
 })
