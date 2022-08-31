@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.WebUtilities;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,28 +29,7 @@ List<Product> products1 = new List<Product>() {
 
 
 
-
-
-
-
-app.MapGet("/product/get-product", (int id) =>
-{
-    
-    var ID = new List<Product>();
-
-    foreach (var product in products1)
-    {
-
-        if (id == product.Id)
-        {
-            ID.Add(product);
-        }
-    }
-    return ID;
-
-
-})
-    .WithName("GetProduct");
+var response = new HttpResponseMessage(HttpStatusCode.OK);
 
 
 
@@ -57,22 +37,66 @@ app.MapGet("/products/{get-all}", () =>
 {
     
         var Id = products1;
-        return Id;
+
+        if (Id == null)
+    {
+        return Results.NotFound("There are no products");
+    }
+        return Results.Ok(Id);
     
 })
     .WithName("GetProducts");
 
+app.MapGet("/product/get-product", (int id) =>
+{
+
+
+    var ID = new List<Product>();
+
+    var result = products1.FirstOrDefault(x => x.Id == id);
+
+    if (result == null)
+    {
+        return Results.NotFound("Product does not exist");
+    }
+
+
+    return Results.Ok(result);
+
+
+})
+    .WithName("GetProduct");
+
 app.MapPost("/products/{create-product}", (int id, string name, string description, double price) =>
 {
 
-    
+    if(name.Length > 120 || name.Length == 0)
+    {
+        return Results.BadRequest("Invalid Product name");
+    }
 
-    
+    if(description.Length > 120 || description.Length == 0)
+    {
+        return Results.BadRequest("Invalid Product description");
+    }
+
+    if(price <= 0)
+    {
+        return Results.BadRequest("Invalid Price");
+    }
+
+    var result = products1.FirstOrDefault(x => x.Id == id);
+
+    if(result != null)
+    {
+        return Results.BadRequest("Id is already used");
+    }
+
 
     var product =  new Product(){Id = id, Name= name, Description= description, Price= price };
     products1.Add(product);
      var Id = products1;
-    return Id;
+    return Results.Ok(Id);
 
 
 
@@ -107,7 +131,7 @@ app.MapDelete("/products/{delete-product}", (int Id) =>
     var id = products1.FindIndex(products1 => products1.Id == Id);
     products1.RemoveAt(id);
 
-    
+   
 
     var iD = products1;
     return iD;
