@@ -126,7 +126,7 @@ app.Run();
 
 //see: https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-6.0
 // Hi 383 - this is added so we can test our web project automatically. More on that later
-public partial class Product {
+public  class Product {
 
     public int Id { get; set; }
     public string Name { get; set; }
@@ -135,3 +135,5 @@ public partial class Product {
 
 
 }
+
+public partial class Project { }
