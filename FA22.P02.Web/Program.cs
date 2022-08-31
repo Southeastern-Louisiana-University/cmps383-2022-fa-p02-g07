@@ -106,7 +106,12 @@ app.MapPost("/products/{create-product}", (int id, string name, string descripti
 
 app.MapPut("/products/{update-product}", (int id, string name, string description, double price) =>
 {
+    var result = products1.FirstOrDefault(x => x.Id == id);
 
+    if(result == null)
+    {
+        return Results.BadRequest("Product does not exist");
+    }
     var product = new Product() { Id = id, Name = name, Description = description, Price = price };
     foreach(var products in products1)
     {
@@ -120,7 +125,7 @@ app.MapPut("/products/{update-product}", (int id, string name, string descriptio
     }
     
     var Id = products1;
-    return Id;
+    return Results.Ok(Id);
 })
     .WithName("UpdateProduct");
 
