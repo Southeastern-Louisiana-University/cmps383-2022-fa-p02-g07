@@ -1,7 +1,4 @@
-using System;
-using System.Data;
-using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,10 +30,22 @@ List<Product> products1 = new List<Product>() {
 
 
 
-app.MapGet("/product/get-product", (int i) =>
+
+
+app.MapGet("/product/get-product", (int id) =>
 {
-    var id = products1[i];
-    return id;
+    
+    var ID = new List<Product>();
+
+    foreach (var product in products1)
+    {
+
+        if (id == product.Id)
+        {
+            ID.Add(product);
+        }
+    }
+    return ID;
 
 
 })
@@ -53,10 +62,14 @@ app.MapGet("/products/{get-all}", () =>
 })
     .WithName("GetProducts");
 
-app.MapPost("/products/{create-product}", (int i, string name, string description, double price) =>
+app.MapPost("/products/{create-product}", (int id, string name, string description, double price) =>
 {
+
     
-    var product =  new Product(){Id = i, Name= name, Description= description, Price= price };
+
+    
+
+    var product =  new Product(){Id = id, Name= name, Description= description, Price= price };
     products1.Add(product);
      var Id = products1;
     return Id;
@@ -67,22 +80,37 @@ app.MapPost("/products/{create-product}", (int i, string name, string descriptio
 })
     .WithName("CreateProduct");
 
-app.MapPut("/products/{update-product}", (int i, string name, string description, double price) =>
+app.MapPut("/products/{update-product}", (int id, string name, string description, double price) =>
 {
 
-    var product = new Product() { Id = i, Name = name, Description = description, Price = price };
-    products1[i] = product;
+    var product = new Product() { Id = id, Name = name, Description = description, Price = price };
+    foreach(var products in products1)
+    {
+        if(id == products.Id)
+        {
+            
+            products.Name = name;
+            products.Description = description;
+            products.Price = price;
+        }
+    }
+    
     var Id = products1;
     return Id;
 })
     .WithName("UpdateProduct");
 
-app.MapDelete("/products/{delete-product}", (int i) =>
+app.MapDelete("/products/{delete-product}", (int Id) =>
 {
+   
+   
+    var id = products1.FindIndex(products1 => products1.Id == Id);
+    products1.RemoveAt(id);
 
-    products1.RemoveAt(i);
-    var Id = products1;
-    return Id;
+    
+
+    var iD = products1;
+    return iD;
 
 
 })
