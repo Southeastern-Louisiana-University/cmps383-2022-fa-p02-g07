@@ -20,7 +20,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 
-List<Product> products1 = new List<Product>() {
+List<Product> products = new List<Product>() {
                 new Product(){ Id = 1, Name="Ketchup", Description="Condiment", Price= 4.99},
                 new Product(){ Id = 2, Name="Mustard", Description="Condiment", Price= 2.99},
                 new Product(){ Id = 3, Name="Mayo", Description="Condiment", Price= 3.99},
@@ -33,27 +33,18 @@ var response = new HttpResponseMessage(HttpStatusCode.OK);
 
 
 
-app.MapGet("/products/{get-all}", () =>
+app.MapGet("/api/products", () =>
 {
-    
-        var Id = products1;
-
-        if (Id == null)
-    {
-        return Results.NotFound("There are no products");
-    }
-        return Results.Ok(Id);
+   
+        return Results.Ok(products);
     
 })
     .WithName("GetProducts");
 
-app.MapGet("/product/get-product", (int id) =>
+app.MapGet("/api/products/{id}", (int id) =>
 {
 
-
-    var ID = new List<Product>();
-
-    var result = products1.FirstOrDefault(x => x.Id == id);
+    var result = products.FirstOrDefault(x => x.Id == id);
 
     if (result == null)
     {
@@ -67,100 +58,109 @@ app.MapGet("/product/get-product", (int id) =>
 })
     .WithName("GetProduct");
 
-app.MapPost("/products/{create-product}", (int id, string name, string description, double price) =>
+app.MapPost("/api/products", (Product foo) =>
 {
 
-    if(name.Length > 120 || name.Length == 0)
+    if(foo.Id == 0 || foo.Id < 0)
     {
-        return Results.BadRequest("Invalid Product name");
+        return Results.BadRequest("Id cannot be 0 or less than 0");
     }
 
-    if(description.Length > 120 || description.Length == 0)
+    if (foo.Name == null || foo.Name.Length > 120)
     {
-        return Results.BadRequest("Invalid Product description");
+        return Results.BadRequest("No Name");
     }
 
-    if(price <= 0)
+
+    if(foo.Price <= 0)
     {
         return Results.BadRequest("Invalid Price");
     }
 
-    var result = products1.FirstOrDefault(x => x.Id == id);
+    if(foo.Description == null)
+    {
+        return Results.BadRequest("No Description");
+    }
 
-    if(result != null)
+    
+
+    if(products.FirstOrDefault(x => x.Id == foo.Id) != null)
     {
         return Results.BadRequest("Id is already used");
     }
 
 
-    var product =  new Product(){Id = id, Name= name, Description= description, Price= price };
-    products1.Add(product);
-     var Id = products1;
-    return Results.Ok(Id);
+    
+    products.Add(foo);
+    return Results.Created("This is your created product:",foo);
+   
 
-
+    
 
 
 })
     .WithName("CreateProduct");
 
-app.MapPut("/products/{update-product}", (int id, string name, string description, double price) =>
+app.MapPut("/api/products/{id}", (int id, Product foo) =>
 {
-    var result = products1.FirstOrDefault(x => x.Id == id);
+    var result = products.FirstOrDefault(x => x.Id == id);
 
-    if(result == null)
+    if (products.FirstOrDefault(x => x.Id == id) == null)
     {
-        return Results.BadRequest("Product does not exist");
+        return Results.NotFound("Product does not exist");
     }
 
-    if (name.Length > 120 || name.Length == 0)
+
+    if (foo.Name == null || foo.Name == "")
+    {
+        return Results.BadRequest("No Name");
+    }
+
+    if (foo.Name.Length > 120 || foo.Name.Length == 0)
     {
         return Results.BadRequest("Invalid Product name");
     }
 
-    if (description.Length > 120 || description.Length == 0)
+    if (foo.Description == null || foo.Name == "")
     {
-        return Results.BadRequest("Invalid Product description");
+        return Results.BadRequest("No Description");
     }
 
-    if (price <= 0)
+
+    if (foo.Price <= 0)
     {
         return Results.BadRequest("Invalid Price");
     }
 
     
-    foreach(var products in products1)
+    foreach(var products in products)
     {
-        if(id == products.Id)
+        if(foo.Id == products.Id)
         {
             
-            products.Name = name;
-            products.Description = description;
-            products.Price = price;
+            products.Name = foo.Name;
+            products.Description = foo.Description;
+            products.Price = foo.Price;
         }
     }
     
-    var Id = products1;
-    return Results.Ok(Id);
+    
+    return Results.Ok(foo);
 })
     .WithName("UpdateProduct");
 
-app.MapDelete("/products/{delete-product}", (int Id) =>
+app.MapDelete("/api/products/{id}", (int id) =>
 {
-    var result = products1.FirstOrDefault(x => x.Id == Id);
+    
 
-    if (result == null)
+    if (products.FirstOrDefault(x => x.Id == id) == null)
     {
-        return Results.BadRequest("Product does not exist");
+        return Results.NotFound("Product does not exist");
     }
 
-    var id = products1.FirstOrDefault(x => x.Id == Id);
-    products1.Remove(id);
+    products.Remove(products.FirstOrDefault(x => x.Id == id));
 
-   
-
-    var iD = products1;
-    return Results.Ok(iD);
+    return Results.Ok(products);
 
 
 })
