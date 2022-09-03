@@ -61,45 +61,37 @@ app.MapGet("/api/products/{id}", (int id) =>
 app.MapPost("/api/products", (Product foo) =>
 {
 
-    if(foo.Id == 0 || foo.Id < 0)
+    if (foo.Id == 0 || foo.Id < 0)
     {
         return Results.BadRequest("Id cannot be 0 or less than 0");
     }
 
-    if (foo.Name == null || foo.Name.Length > 120)
-    {
-        return Results.BadRequest("No Name");
-    }
-
-
-    if(foo.Price <= 0)
-    {
-        return Results.BadRequest("Invalid Price");
-    }
-
-    if(foo.Description == null)
-    {
-        return Results.BadRequest("No Description");
-    }
-
-    
-
-    if(products.FirstOrDefault(x => x.Id == foo.Id) != null)
-    {
-        return Results.BadRequest("Id is already used");
-    }
-
-
-    
-    products.Add(foo);
-    return Results.Created("This is your created product:",foo);
    
-
     
+
+    if (string.IsNullOrEmpty(foo.Name) ||
+        foo.Name.Length > 120 ||
+        foo.Price <= 0 ||
+        string.IsNullOrEmpty(foo.Description))
+    {
+        return Results.BadRequest();
+    }
+
+
+
+
+
+    products.Add(foo);
+    return Results.Created("This is your created product:", foo);
+
+
+
 
 
 })
-    .WithName("CreateProduct");
+    .Produces(400)
+    .Produces(201, typeof(Product));
+    
 
 app.MapPut("/api/products/{id}", (int id, Product foo) =>
 {
@@ -152,19 +144,24 @@ app.MapPut("/api/products/{id}", (int id, Product foo) =>
 app.MapDelete("/api/products/{id}", (int id) =>
 {
     
+    var current = products.FirstOrDefault(x => x.Id == id);
 
-    if (products.FirstOrDefault(x => x.Id == id) == null)
+    if (current == null)
     {
-        return Results.NotFound("Product does not exist");
+        return Results.NotFound();
     }
 
-    products.Remove(products.FirstOrDefault(x => x.Id == id));
+    products.Remove(current);
 
     return Results.Ok(products);
 
 
 })
+    .Produces(400)
+    .Produces(404)
+    .Produces(200, typeof(Product))
     .WithName("DeleteProduct");
+    
 
 
 
