@@ -1,3 +1,4 @@
+using FA22.P02.Web.Feature;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Net;
 
@@ -19,11 +20,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
-List<Product> products = new List<Product>() {
-                new Product(){ Id = 1, Name="Ketchup", Description="Condiment", Price= 4.99},
-                new Product(){ Id = 2, Name="Mustard", Description="Condiment", Price= 2.99},
-                new Product(){ Id = 3, Name="Mayo", Description="Condiment", Price= 3.99},
+var currentId = 1;
+ var products = new List<ProductDto>() {
+                new ProductDto(){ Id = currentId++, Name="Ketchup", Description="Condiment", Price= 4.99m},
+                new ProductDto(){ Id = currentId++, Name="Mustard", Description="Condiment", Price= 2.99m},
+                new ProductDto(){ Id = currentId++, Name="Mayo", Description="Condiment", Price= 3.99m},
                 
             };
 
@@ -58,38 +59,27 @@ app.MapGet("/api/products/{id}", (int id) =>
 })
     .WithName("GetProduct");
 
-app.MapPost("/api/products", (Product foo) =>
+app.MapPost("/api/products", (ProductDto foo) =>
 {
 
 
-   
-    
-
-    if (string.IsNullOrEmpty(foo.Name) ||
-        foo.Name.Length > 120 ||
-        foo.Price <= 0 ||
-        string.IsNullOrEmpty(foo.Description))
+    if (string.IsNullOrWhiteSpace(foo.Name) ||
+             foo.Name.Length > 120 ||
+             foo.Price <= 0 ||
+             string.IsNullOrWhiteSpace(foo.Description))
     {
         return Results.BadRequest();
     }
 
-
-
-
-
+    foo.Id = currentId++;
     products.Add(foo);
-    return Results.Created("This is your created product:", foo);
-
-
-
-
-
+    return Results.CreatedAtRoute("GetProduct", new { id = foo.Id }, foo);
 })
     .Produces(400)
-    .Produces(201, typeof(Product));
-    
+    .Produces(201, typeof(ProductDto));
 
-app.MapPut("/api/products/{id}", (int id, Product foo) =>
+
+app.MapPut("/api/products/{id}", (int id, ProductDto foo) =>
 {
     var result = products.FirstOrDefault(x => x.Id == id);
 
@@ -153,9 +143,6 @@ app.MapDelete("/api/products/{id}", (int id) =>
 
 
 })
-    .Produces(400)
-    .Produces(404)
-    .Produces(200, typeof(Product))
     .WithName("DeleteProduct");
     
 
@@ -167,10 +154,10 @@ app.Run();
 
 public  class Product {
 
-    public int Id { get; set; }
+    
     public string Name { get; set; }
     public string Description { get; set; }
-    public double Price { get; set; }
+    public int Price { get; set; }
 
 
 }
