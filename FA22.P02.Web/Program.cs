@@ -61,10 +61,6 @@ app.MapGet("/api/products/{id}", (int id) =>
 app.MapPost("/api/products", (Product foo) =>
 {
 
-    if (foo.Id == 0 || foo.Id < 0)
-    {
-        return Results.BadRequest("Id cannot be 0 or less than 0");
-    }
 
    
     
